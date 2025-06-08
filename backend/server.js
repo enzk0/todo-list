@@ -20,6 +20,10 @@ app.use(cors()); // Enable CORS for all routes
 // Routes
 app.use("/api/notes", noteRoutes);
 
+app.get("/", (req, res) => {
+    res.send("Welcome to the Notes API!");
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
