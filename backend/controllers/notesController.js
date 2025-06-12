@@ -11,8 +11,31 @@ export const getNotes = async (req, res) => {
 };
 
 export const getNote = async (req, res) => {
-    const { id } = req.params;
-    return res.send(`Get note with ID: ${id}`);
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Note ID is required" });
+        }
+
+        const note = await sql`SELECT * FROM notes WHERE id=${id}`;
+
+        if (note.length === 0) {
+            return res
+                .status(404)
+                .json({ success: false, message: "Note not found" });
+        }
+
+        console.log("Note fetched successfully:", note[0]);
+        return res.status(200).json({ success: true, data: note[0] });
+    } catch (error) {
+        console.error("Error fetching note:", error);
+        return res
+            .status(500)
+            .json({ success: false, message: "Internal Server Error" });
+    }
 };
 
 export const createNote = async (req, res) => {
