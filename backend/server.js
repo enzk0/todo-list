@@ -5,7 +5,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import noteRoutes from "./routes/notesRoutes.js";
-import sql from "../config/db.js"; // Import the database connection
+import seedDB from "../config/seed.js"; // Import the seed function to seed the database
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -18,31 +18,6 @@ app.use(morgan("dev")); // Logging middleware, logs requests to the console
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cors()); // Enable CORS for all routes
 
-async function seedDB() {
-    try {
-        console.log("Seeding the database...");
-        console.log("Dropping existing notes table...");
-        await sql`
-            DROP TABLE IF EXISTS notes;
-        `;
-        console.log("Creating notes table...");
-        await sql`
-            CREATE TABLE IF NOT EXISTS notes (
-                id SERIAL PRIMARY KEY,
-                title VARCHAR(255) NOT NULL,
-                content TEXT NOT NULL,
-                isCompleted BOOLEAN DEFAULT FALSE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `;
-
-        console.log("Database seeded successfully.");
-    } catch (error) {
-        console.error("Error seeding the database:", error);
-    }
-}
-// Routes
 app.use("/api/notes", noteRoutes);
 
 app.get("/", (req, res) => {
