@@ -90,8 +90,55 @@ export const createNote = async (req, res) => {
 };
 
 export const updateNote = async (req, res) => {
-    const { id } = req.params;
-    return res.send(`Update note with ID: ${id}`);
+    try {
+        const { id } = req.params;
+        const { title, content, isCompleted } = req.body;
+
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: "Note ID is required",
+            });
+        }
+        if (!title || !content) {
+            return res.status(400).json({
+                success: false,
+                message: "Title and content are required",
+            });
+        }
+        if (typeof isCompleted !== "boolean") {
+            return res.status(400).json({
+                success: false,
+                message: "isCompleted must be a boolean",
+            });
+        }
+
+        const updatedNote = await sql`UPDATE notes 
+            SET title = ${title}, 
+            content = ${content}, 
+            isCompleted = ${isCompleted}, 
+            updated_at = CURRENT_TIMESTAMP
+            WHERE id = ${id} RETURNING *;`;
+
+        if (updatedNote.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Note not found",
+            });
+        }
+
+        console.log("Note updated successfully:", updatedNote[0]);
+        res.status(200).json({
+            success: true,
+            data: updatedNote[0],
+        });
+    } catch (error) {
+        console.error("Error updating note:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
 };
 
 export const deleteNote = async (req, res) => {
