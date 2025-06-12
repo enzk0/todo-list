@@ -2,15 +2,15 @@ import sql from "../../config/db.js";
 
 export const getNotes = async (req, res) => {
     try {
-        const { isCompleted } = req.query;
+        const { is_completed } = req.query;
 
         let notes;
 
-        if (isCompleted === "true" || isCompleted === "false") {
-            const isCompletedBool = isCompleted === "true";
+        if (is_completed === "true" || is_completed === "false") {
+            const is_completedBool = is_completed === "true";
             notes = await sql`
                 SELECT * FROM notes
-                WHERE isCompleted = ${isCompletedBool}
+                WHERE is_completed = ${is_completedBool}
                 ORDER BY created_at DESC;
             `;
         } else {
@@ -89,10 +89,10 @@ export const createNote = async (req, res) => {
     }
 };
 
-export const updateNote = async (req, res) => {
+export const editNote = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, content, isCompleted } = req.body;
+        const { title, content, is_completed } = req.body;
 
         if (!id) {
             return res.status(400).json({
@@ -100,25 +100,49 @@ export const updateNote = async (req, res) => {
                 message: "Note ID is required",
             });
         }
-        if (!title || !content) {
-            return res.status(400).json({
+
+        const existingNote = await sql`SELECT * FROM notes WHERE id = ${id};`;
+        if (existingNote.length === 0) {
+            return res.status(404).json({
                 success: false,
-                message: "Title and content are required",
+                message: "Note not found",
             });
         }
-        if (typeof isCompleted !== "boolean") {
+        console.log("Existing note:", existingNote[0]);
+
+        // Validate required fields
+        if (
+            title === undefined &&
+            content === undefined &&
+            is_completed === undefined
+        ) {
             return res.status(400).json({
                 success: false,
-                message: "isCompleted must be a boolean",
+                message:
+                    "At least one field (title, content, is_completed) must be provided for update",
             });
         }
 
-        const updatedNote = await sql`UPDATE notes 
-            SET title = ${title}, 
-            content = ${content}, 
-            isCompleted = ${isCompleted}, 
-            updated_at = CURRENT_TIMESTAMP
-            WHERE id = ${id} RETURNING *;`;
+        // Collect fields to update
+        const fieldsToUpdate = {};
+        fieldsToUpdate.title =
+            title !== undefined ? title : existingNote[0].title;
+        fieldsToUpdate.content =
+            content !== undefined ? content : existingNote[0].content;
+        fieldsToUpdate.is_completed =
+            is_completed !== undefined
+                ? is_completed
+                : existingNote[0].is_completed;
+        // Ensure is_completed is a boolean if provided
+
+        console.log("Fields to update:", fieldsToUpdate);
+
+        const updatedNote = await sql`UPDATE notes SET 
+                    title = ${fieldsToUpdate.title},
+                    content = ${fieldsToUpdate.content},
+                    is_completed = ${fieldsToUpdate.is_completed},
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ${id} RETURNING *;`;
 
         if (updatedNote.length === 0) {
             return res.status(404).json({
@@ -143,13 +167,13 @@ export const updateNote = async (req, res) => {
 
 export const deleteNotes = async (req, res) => {
     try {
-        const { isCompleted } = req.query;
+        const { is_completed } = req.query;
 
-        if (isCompleted === "true" || isCompleted === "false") {
-            const isCompletedBool = isCompleted === "true";
+        if (is_completed === "true" || is_completed === "false") {
+            const is_completedBool = is_completed === "true";
             const deletedNotes = await sql`
                 DELETE FROM notes
-                WHERE isCompleted = ${isCompletedBool}
+                WHERE is_completed = ${is_completedBool}
                 RETURNING *;
             `;
 
