@@ -2,7 +2,24 @@ import sql from "../../config/db.js";
 
 export const getNotes = async (req, res) => {
     try {
-        const notes = await sql` SELECT * FROM notes ORDER BY created_at DESC;`;
+        const { isCompleted } = req.query;
+
+        let notes;
+
+        if (isCompleted === "true" || isCompleted === "false") {
+            const isCompletedBool = isCompleted === "true";
+            notes = await sql`
+                SELECT * FROM notes
+                WHERE isCompleted = ${isCompletedBool}
+                ORDER BY created_at DESC;
+            `;
+        } else {
+            notes = await sql`
+                SELECT * FROM notes
+                ORDER BY created_at DESC;
+            `;
+        }
+
         console.log("Notes fetched successfully:", notes);
         res.status(200).json({ success: true, data: notes });
     } catch (error) {
