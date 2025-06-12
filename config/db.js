@@ -1,0 +1,13 @@
+import { neon } from "@neondatabase/serverless";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const { PGUSER, PGPASSWORD, PGHOST, PGDATABASE } = process.env;
+
+//creates sql connection string using environment variables
+const sql = neon(
+    `postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?sslmode=require`
+);
+
+export default sql;
