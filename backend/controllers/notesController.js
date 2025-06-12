@@ -7,6 +7,10 @@ export const getNotes = async (req, res) => {
         res.status(200).json({ success: true, data: notes });
     } catch (error) {
         console.error("Error fetching notes:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
     }
 };
 
@@ -32,14 +36,40 @@ export const getNote = async (req, res) => {
         return res.status(200).json({ success: true, data: note[0] });
     } catch (error) {
         console.error("Error fetching note:", error);
-        return res
-            .status(500)
-            .json({ success: false, message: "Internal Server Error" });
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
     }
 };
 
 export const createNote = async (req, res) => {
-    return res.send("Create a note");
+    try {
+        const { title, content } = req.body;
+
+        if (!title || !content) {
+            return res.status(400).json({
+                success: false,
+                message: "Title and content are required",
+            });
+        }
+
+        const newNote =
+            await sql`INSERT INTO notes(title, content) VALUES (${title}, ${content}) RETURNING *;`;
+
+        console.log("Note created successfully:", { title, content });
+
+        res.status(201).json({
+            success: true,
+            data: newNote[0],
+        });
+    } catch (error) {
+        console.error("Error creating note:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
 };
 
 export const updateNote = async (req, res) => {
