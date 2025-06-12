@@ -1,5 +1,13 @@
+import sql from "../../config/db.js";
+
 export const getNotes = async (req, res) => {
-    return res.send("Get all notes");
+    try {
+        const notes = await sql` SELECT * FROM notes ORDER BY created_at DESC;`;
+        console.log("Notes fetched successfully:", notes);
+        res.status(200).json({ success: true, data: notes });
+    } catch (error) {
+        console.error("Error fetching notes:", error);
+    }
 };
 
 export const getNote = async (req, res) => {
