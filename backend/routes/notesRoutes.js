@@ -5,6 +5,7 @@ import {
     createNote,
     updateNote,
     deleteNote,
+    deleteNotes,
 } from "../controllers/notesController.js";
 
 const router = express.Router();
@@ -14,5 +15,6 @@ router.get("/:id", getNote); // Gets a specific note by ID
 router.post("/", createNote); // Route to create a new note
 router.put("/:id", updateNote); // Updates a specific note by ID
 router.delete("/:id", deleteNote); // Deletes a specific note by ID
+router.delete("/", deleteNotes); // Deletes all notes
 
 export default router;
