@@ -141,6 +141,54 @@ export const updateNote = async (req, res) => {
     }
 };
 
+export const deleteNotes = async (req, res) => {
+    try {
+        const { isCompleted } = req.query;
+
+        if (isCompleted === "true" || isCompleted === "false") {
+            const isCompletedBool = isCompleted === "true";
+            const deletedNotes = await sql`
+                DELETE FROM notes
+                WHERE isCompleted = ${isCompletedBool}
+                RETURNING *;
+            `;
+
+            if (deletedNotes.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "No notes found to delete",
+                });
+            }
+
+            console.log("Notes deleted successfully:", deletedNotes);
+            return res.status(200).json({
+                success: true,
+                data: deletedNotes,
+            });
+        }
+        const deletedNotes = await sql`DELETE FROM notes RETURNING *;`;
+
+        if (deletedNotes.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No notes found to delete",
+            });
+        }
+
+        console.log("All notes deleted successfully");
+        res.status(200).json({
+            success: true,
+            data: deletedNotes,
+        });
+    } catch (error) {
+        console.error("Error deleting notes:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+};
+
 export const deleteNote = async (req, res) => {
     try {
         const { id } = req.params;
