@@ -13,14 +13,14 @@ async function seedDB() {
                 id SERIAL PRIMARY KEY,
                 title VARCHAR(255) NOT NULL,
                 content TEXT NOT NULL,
-                isCompleted BOOLEAN DEFAULT FALSE,
+                is_completed BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `;
         console.log("Inserting initial data into notes table...");
         await sql`
-            INSERT INTO notes (title, content, isCompleted)
+            INSERT INTO notes (title, content, is_completed)
             VALUES
                 ('Do the Dishes', 'Do the dishes by 5:30pm', true),
                 ('Sweep the Floor', 'Sweep the floor this coming Friday', false),
