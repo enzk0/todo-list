@@ -119,7 +119,7 @@ export const editNote = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message:
-                    "At least one field (title, content, is_completed) must be provided for update",
+                    "At least one field---title, content, is_completed---must be provided for the update.",
             });
         }
 
